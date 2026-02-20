@@ -13,25 +13,23 @@ class CardItem {
     this.lastTested,
   });
 
-  factory CardItem.fromJson(Map<String, dynamic> json, Map<String, dynamic>? progress) {
+  factory CardItem.fromJson(
+    Map<String, dynamic> json,
+    Map<String, dynamic>? progress,
+  ) {
     return CardItem(
       id: json['id'],
       keyword: json['keyword'],
       description: json['description'],
-      stats: progress != null 
-          ? CardStats.fromJson(progress) 
-          : CardStats(),
-      lastTested: progress?['lastTested'] != null 
-          ? DateTime.parse(progress!['lastTested']) 
+      stats: progress != null ? CardStats.fromJson(progress) : CardStats(),
+      lastTested: progress?['lastTested'] != null
+          ? DateTime.parse(progress!['lastTested'])
           : null,
     );
   }
 
   Map<String, dynamic> toProgressJson() {
-    return {
-      'lastTested': lastTested?.toIso8601String(),
-      ...stats.toJson(),
-    };
+    return {'lastTested': lastTested?.toIso8601String(), ...stats.toJson()};
   }
 }
 

@@ -25,12 +25,12 @@ class _LearningScreenState extends State<LearningScreen> {
 
   Future<void> _loadInitialData() async {
     final allCards = await _storageService.loadCards();
-    
+
     // 3단계 핵심: 청킹 전략 (5~10개 항목씩 세트 구성)
     // 현재는 단순 무작위 10개 선택으로 구현 (나중에는 마스터 안된 것 우선순위 가능)
     final random = Random();
     allCards.shuffle(random);
-    
+
     setState(() {
       _learningCards = allCards.take(10).toList();
       _isLoading = false;
@@ -56,9 +56,7 @@ class _LearningScreenState extends State<LearningScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (_learningCards.isEmpty) {
@@ -69,7 +67,7 @@ class _LearningScreenState extends State<LearningScreen> {
     }
 
     final currentCard = _learningCards[_currentIndex];
-    
+
     // 양방향 학습 로직 (나중에는 설정으로 변경 가능)
     // 현재는 키워드가 앞면, 설명이 뒷면으로 기본 고정
     final String front = currentCard.keyword;
@@ -100,7 +98,9 @@ class _LearningScreenState extends State<LearningScreen> {
                 ),
                 const SizedBox(width: 40),
                 IconButton(
-                  onPressed: _currentIndex < _learningCards.length - 1 ? _nextCard : null,
+                  onPressed: _currentIndex < _learningCards.length - 1
+                      ? _nextCard
+                      : null,
                   icon: const Icon(Icons.arrow_forward_ios),
                   iconSize: 40,
                 ),

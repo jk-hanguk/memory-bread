@@ -15,8 +15,8 @@ class StorageService {
     // 2. LocalStorage에서 진행 상황 로드
     final prefs = await SharedPreferences.getInstance();
     final String? progressString = prefs.getString(_progressKey);
-    final Map<String, dynamic> progressMap = progressString != null 
-        ? json.decode(progressString) 
+    final Map<String, dynamic> progressMap = progressString != null
+        ? json.decode(progressString)
         : {};
 
     // 3. 결합하여 CardItem 리스트 생성

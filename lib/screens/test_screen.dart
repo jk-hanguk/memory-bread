@@ -13,7 +13,7 @@ class TestScreen extends StatefulWidget {
 class _TestScreenState extends State<TestScreen> {
   final StorageService _storageService = StorageService();
   final Random _random = Random();
-  
+
   List<CardItem> _allCards = [];
   List<CardItem> _testCards = [];
   int _currentIndex = 0;
@@ -40,7 +40,7 @@ class _TestScreenState extends State<TestScreen> {
     // 테스트용 10개 항목 무작위 선택
     _allCards.shuffle(_random);
     _testCards = _allCards.take(min(10, _allCards.length)).toList();
-    
+
     _generateNextQuestion();
     setState(() => _isLoading = false);
   }
@@ -61,11 +61,8 @@ class _TestScreenState extends State<TestScreen> {
         .map((c) => c.description)
         .toList();
     otherDescriptions.shuffle(_random);
-    
-    List<String> options = [
-      _correctAnswer,
-      ...otherDescriptions.take(3),
-    ];
+
+    List<String> options = [_correctAnswer, ...otherDescriptions.take(3)];
     options.shuffle(_random);
 
     setState(() {
@@ -79,7 +76,7 @@ class _TestScreenState extends State<TestScreen> {
 
     // 개별 카드의 통계 업데이트
     _testCards[_currentIndex].stats.updateResult(isCorrect);
-    
+
     setState(() {
       _currentIndex++;
     });
@@ -90,7 +87,7 @@ class _TestScreenState extends State<TestScreen> {
     // 업데이트된 카드들의 상태를 반영하여 전체 리스트를 저장
     final Map<String, CardItem> testMap = {for (var c in _testCards) c.id: c};
     final updatedAllCards = _allCards.map((c) => testMap[c.id] ?? c).toList();
-    
+
     await _storageService.saveProgress(updatedAllCards);
   }
 
@@ -161,7 +158,7 @@ class _TestScreenState extends State<TestScreen> {
             Container(
               padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
@@ -174,23 +171,25 @@ class _TestScreenState extends State<TestScreen> {
               ),
             ),
             const Spacer(),
-            ..._currentOptions.map((option) => Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            ..._currentOptions.map(
+              (option) => Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () => _handleAnswer(option),
+                  child: Text(
+                    option,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 16),
                   ),
                 ),
-                onPressed: () => _handleAnswer(option),
-                child: Text(
-                  option,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 16),
-                ),
               ),
-            )),
+            ),
           ],
         ),
       ),

@@ -37,14 +37,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       progressMap[card.id] = card.toProgressJson();
     }
     final String jsonString = json.encode(progressMap);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('데이터 백업'),
-        content: SingleChildScrollView(
-          child: SelectableText(jsonString),
-        ),
+        content: SingleChildScrollView(child: SelectableText(jsonString)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -63,14 +61,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     final int total = _cards.length;
     final int mastered = _cards.where((c) => c.stats.isMastered).length;
-    final int inProgress = _cards.where((c) => c.stats.totalAttempts > 0 && !c.stats.isMastered).length;
-    final int notStarted = _cards.where((c) => c.stats.totalAttempts == 0).length;
+    final int inProgress = _cards
+        .where((c) => c.stats.totalAttempts > 0 && !c.stats.isMastered)
+        .length;
+    final int notStarted = _cards
+        .where((c) => c.stats.totalAttempts == 0)
+        .length;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('학습 대시보드'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('학습 대시보드'), centerTitle: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -89,15 +88,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
             GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
+              crossAxisCount: MediaQuery.of(context).size.width > 600 ? 4 : 2,
               mainAxisSpacing: 15,
               crossAxisSpacing: 15,
               childAspectRatio: 1.2,
               children: [
-                _buildSummaryItem(context, '전체 항목', total.toString(), Colors.blue),
-                _buildSummaryItem(context, '마스터', mastered.toString(), Colors.green),
-                _buildSummaryItem(context, '학습 중', inProgress.toString(), Colors.orange),
-                _buildSummaryItem(context, '미시작', notStarted.toString(), Colors.grey),
+                _buildSummaryItem(
+                  context,
+                  '전체 항목',
+                  total.toString(),
+                  Colors.blue,
+                ),
+                _buildSummaryItem(
+                  context,
+                  '마스터',
+                  mastered.toString(),
+                  Colors.green,
+                ),
+                _buildSummaryItem(
+                  context,
+                  '학습 중',
+                  inProgress.toString(),
+                  Colors.orange,
+                ),
+                _buildSummaryItem(
+                  context,
+                  '미시작',
+                  notStarted.toString(),
+                  Colors.grey,
+                ),
               ],
             ),
             const SizedBox(height: 40),
@@ -120,7 +139,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildStatCard(BuildContext context, String title, String value, Widget progress) {
+  Widget _buildStatCard(
+    BuildContext context,
+    String title,
+    String value,
+    Widget progress,
+  ) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -130,10 +154,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(title, style: Theme.of(context).textTheme.titleMedium),
-                Text(value, style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                )),
+                Text(
+                  value,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 15),
@@ -144,7 +171,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildSummaryItem(BuildContext context, String label, String count, Color color) {
+  Widget _buildSummaryItem(
+    BuildContext context,
+    String label,
+    String count,
+    Color color,
+  ) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(15),
@@ -153,10 +185,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Text(label, style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 5),
-            Text(count, style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
-            )),
+            Text(
+              count,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                color: color,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ),

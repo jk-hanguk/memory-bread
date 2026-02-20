@@ -82,21 +82,27 @@ class HomeScreen extends StatelessWidget {
               icon: const Icon(Icons.school),
               label: const Text('학습 시작'),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 40,
+                  vertical: 15,
+                ),
                 textStyle: const TextStyle(fontSize: 18),
               ),
             ),
             const SizedBox(height: 16),
             OutlinedButton.icon(
               onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const TestScreen()),
-                );
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => const TestScreen()));
               },
               icon: const Icon(Icons.quiz),
               label: const Text('테스트 시작'),
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 40,
+                  vertical: 15,
+                ),
                 textStyle: const TextStyle(fontSize: 18),
               ),
             ),

@@ -5,17 +5,14 @@ class FlashCard extends StatefulWidget {
   final String frontText;
   final String backText;
 
-  const FlashCard({
-    super.key,
-    required this.frontText,
-    required this.backText,
-  });
+  const FlashCard({super.key, required this.frontText, required this.backText});
 
   @override
   State<FlashCard> createState() => _FlashCardState();
 }
 
-class _FlashCardState extends State<FlashCard> with SingleTickerProviderStateMixin {
+class _FlashCardState extends State<FlashCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
   bool _isFront = true;
@@ -77,8 +74,8 @@ class _FlashCardState extends State<FlashCard> with SingleTickerProviderStateMix
     return Card(
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: isFront 
-          ? Theme.of(context).colorScheme.primaryContainer 
+      color: isFront
+          ? Theme.of(context).colorScheme.primaryContainer
           : Theme.of(context).colorScheme.secondaryContainer,
       child: Container(
         width: 300,
@@ -88,9 +85,9 @@ class _FlashCardState extends State<FlashCard> with SingleTickerProviderStateMix
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
     );
