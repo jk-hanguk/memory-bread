@@ -18,6 +18,7 @@ class _LearningScreenState extends State<LearningScreen> {
   List<CardItem> _learningCards = [];
   int _currentIndex = 0;
   bool _isLoading = true;
+  bool _allMastered = false;
 
   @override
   void initState() {
@@ -27,14 +28,41 @@ class _LearningScreenState extends State<LearningScreen> {
 
   Future<void> _loadInitialData() async {
     final allCards = await _storageService.loadCards(widget.assetPath);
-    
+    if (allCards.isEmpty) {
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    // [수정] 동적 학습 문항 수 산출 (전체의 약 20% ~ 25% 수준)
+    // 청킹 전략을 고려하여 최소 5개, 최대 15개로 제한
+    int totalCount = allCards.length;
+    int targetCount = (totalCount * 0.25).floor();
+    if (targetCount < 5) targetCount = 5;
+    if (targetCount > 15) targetCount = 15;
+    targetCount = min(targetCount, totalCount);
+
     final random = Random();
-    allCards.shuffle(random);
     
-    setState(() {
-      _learningCards = allCards.take(10).toList();
-      _isLoading = false;
-    });
+    // 마스터되지 않은 카드만 필터링
+    final unmasteredCards = allCards.where((c) => !c.stats.isMastered).toList();
+    
+    if (unmasteredCards.isEmpty) {
+      // 모든 카드를 마스터한 경우 (복습 모드)
+      allCards.shuffle(random);
+      setState(() {
+        _allMastered = true;
+        _learningCards = allCards.take(targetCount).toList();
+        _isLoading = false;
+      });
+    } else {
+      // 마스터되지 않은 카드 중 동적으로 산출된 개수만큼 무작위 선택
+      unmasteredCards.shuffle(random);
+      setState(() {
+        _allMastered = false;
+        _learningCards = unmasteredCards.take(targetCount).toList();
+        _isLoading = false;
+      });
+    }
   }
 
   void _nextCard() {
@@ -92,6 +120,23 @@ class _LearningScreenState extends State<LearningScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              if (_allMastered)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20.0),
+                  child: Chip(
+                    label: const Text('모든 카드를 마스터했습니다! (복습 모드)'),
+                    backgroundColor: Colors.green.withOpacity(0.1),
+                    labelStyle: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                  ),
+                )
+              else
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20.0),
+                  child: Text(
+                    '마스터하지 않은 카드 ${_learningCards.length}개를 학습합니다. 🍞',
+                    style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                  ),
+                ),
               FlashCard(
                 key: ValueKey('${widget.assetPath}_${currentCard.id}'),
                 frontText: currentCard.keyword,
