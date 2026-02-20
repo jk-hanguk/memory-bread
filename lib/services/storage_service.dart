@@ -2,38 +2,65 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/card_item.dart';
+import 'dart:developer' as developer;
 
 class StorageService {
-  static const String _progressKey = 'memory_bread_progress';
+  static const String _progressKeyPrefix = 'memory_bread_progress_';
 
-  // 정적 데이터(assets/data.json)와 저장된 진행 상황을 결합하여 로드
-  Future<List<CardItem>> loadCards() async {
-    // 1. JSON 파일 로드
-    final String jsonString = await rootBundle.loadString('assets/data.json');
-    final List<dynamic> jsonList = json.decode(jsonString);
+  Future<List<CardItem>> loadCards(String assetPath) async {
+    try {
+      final String jsonString = await rootBundle.loadString(assetPath);
+      final List<dynamic> jsonList = json.decode(jsonString);
 
-    // 2. LocalStorage에서 진행 상황 로드
-    final prefs = await SharedPreferences.getInstance();
-    final String? progressString = prefs.getString(_progressKey);
-    final Map<String, dynamic> progressMap = progressString != null
-        ? json.decode(progressString)
-        : {};
+      final prefs = await SharedPreferences.getInstance();
+      final String progressKey = _progressKeyPrefix + assetPath;
+      final String? progressString = prefs.getString(progressKey);
+      final Map<String, dynamic> progressMap = progressString != null 
+          ? json.decode(progressString) 
+          : {};
 
-    // 3. 결합하여 CardItem 리스트 생성
-    return jsonList.map((json) {
-      final String id = json['id'];
-      return CardItem.fromJson(json, progressMap[id]);
-    }).toList();
+      return jsonList.map((json) {
+        final String id = json['id'];
+        return CardItem.fromJson(json, progressMap[id]);
+      }).toList();
+    } catch (e) {
+      developer.log('Error loading cards: $e', name: 'StorageService');
+      return [];
+    }
   }
 
-  // 진행 상황 저장
-  Future<void> saveProgress(List<CardItem> cards) async {
+  Future<void> saveProgress(String assetPath, List<CardItem> cards) async {
     final Map<String, dynamic> progressMap = {};
     for (var card in cards) {
       progressMap[card.id] = card.toProgressJson();
     }
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_progressKey, json.encode(progressMap));
+    final String progressKey = _progressKeyPrefix + assetPath;
+    await prefs.setString(progressKey, json.encode(progressMap));
+  }
+
+  // 최신 Flutter 3.10+ 공식 AssetManifest API 사용
+  Future<List<String>> listDatasets() async {
+    try {
+      // AssetManifest 라이브러리를 사용하여 안전하게 자산 목록 로드
+      final AssetManifest manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+      final List<String> allAssets = manifest.listAssets();
+      
+      final List<String> datasets = allAssets
+          .where((String key) {
+            final lowerKey = key.toLowerCase();
+            return lowerKey.contains('datasets/') && lowerKey.endsWith('.json');
+          })
+          .toList();
+
+      developer.log('Total Assets (via Official API): ${allAssets.length}', name: 'StorageService');
+      developer.log('Dataset Files Found: $datasets', name: 'StorageService');
+      
+      return datasets;
+    } catch (e) {
+      developer.log('Critical Error using AssetManifest API: $e', name: 'StorageService');
+      return [];
+    }
   }
 }

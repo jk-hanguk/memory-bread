@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'screens/learning_screen.dart';
 import 'screens/test_screen.dart';
 import 'screens/dashboard_screen.dart';
+import 'screens/dataset_browser_screen.dart';
 
 void main() {
   runApp(const MemoryBreadApp());
@@ -14,7 +15,6 @@ class MemoryBreadApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: '암기빵 (Memory Bread)',
-      // Material 3 기반의 라이트 테마 설정
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
@@ -22,7 +22,6 @@ class MemoryBreadApp extends StatelessWidget {
           brightness: Brightness.light,
         ),
       ),
-      // 다크 테마 지원
       darkTheme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
@@ -30,15 +29,32 @@ class MemoryBreadApp extends StatelessWidget {
           brightness: Brightness.dark,
         ),
       ),
-      // 시스템 설정에 따라 테마 모드 변경
       themeMode: ThemeMode.system,
       home: const HomeScreen(),
     );
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String? _selectedDatasetPath;
+
+  void _selectDataset() async {
+    final String? result = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const DatasetBrowserScreen()),
+    );
+    if (result != null) {
+      setState(() {
+        _selectedDatasetPath = result;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,15 +63,18 @@ class HomeScreen extends StatelessWidget {
         title: const Text('암기빵 (Memory Bread)'),
         centerTitle: true,
         actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const DashboardScreen()),
-              );
-            },
-            icon: const Icon(Icons.dashboard),
-            tooltip: '대시보드',
-          ),
+          if (_selectedDatasetPath != null)
+            IconButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => DashboardScreen(assetPath: _selectedDatasetPath!),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.dashboard),
+              tooltip: '대시보드',
+            ),
         ],
       ),
       body: Center(
@@ -72,42 +91,64 @@ class HomeScreen extends StatelessWidget {
               '암기를 도와드릴까요?',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 10),
+            if (_selectedDatasetPath != null)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '선택됨: ${_selectedDatasetPath!.split('/').last}',
+                  style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer),
+                ),
+              ),
+            const SizedBox(height: 30),
             ElevatedButton.icon(
-              onPressed: () {
+              onPressed: _selectDataset,
+              icon: const Icon(Icons.folder_open),
+              label: Text(_selectedDatasetPath == null ? '데이터셋 선택하기' : '데이터셋 변경하기'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _selectedDatasetPath == null ? null : () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const LearningScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => LearningScreen(assetPath: _selectedDatasetPath!),
+                  ),
                 );
               },
               icon: const Icon(Icons.school),
               label: const Text('학습 시작'),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 40,
-                  vertical: 15,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                 textStyle: const TextStyle(fontSize: 18),
               ),
             ),
             const SizedBox(height: 16),
             OutlinedButton.icon(
-              onPressed: () {
-                Navigator.of(
-                  context,
-                ).push(MaterialPageRoute(builder: (_) => const TestScreen()));
+              onPressed: _selectedDatasetPath == null ? null : () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => TestScreen(assetPath: _selectedDatasetPath!),
+                  ),
+                );
               },
               icon: const Icon(Icons.quiz),
               label: const Text('테스트 시작'),
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 40,
-                  vertical: 15,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                 textStyle: const TextStyle(fontSize: 18),
               ),
             ),
             const SizedBox(height: 40),
-            const Text('학습한 내용을 확인해 보세요! 🍞'),
+            const Text('학습할 데이터셋을 먼저 선택해 주세요! 🍞'),
           ],
         ),
       ),

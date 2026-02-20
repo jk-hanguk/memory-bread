@@ -6,7 +6,8 @@ import '../services/storage_service.dart';
 enum TestDirection { keywordToDescription, descriptionToKeyword }
 
 class TestScreen extends StatefulWidget {
-  const TestScreen({super.key});
+  final String assetPath;
+  const TestScreen({super.key, required this.assetPath});
 
   @override
   State<TestScreen> createState() => _TestScreenState();
@@ -34,13 +35,12 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   Future<void> _loadTestData() async {
-    _allCards = await _storageService.loadCards();
+    _allCards = await _storageService.loadCards(widget.assetPath);
     if (_allCards.isEmpty) {
       setState(() => _isLoading = false);
       return;
     }
 
-    // [계획 2.1] 동적 문항 수 산출: 전체의 약 25%를 테스트 (5~10개 사이)
     int totalCount = _allCards.length;
     int targetCount = (totalCount * 0.25).floor();
     if (targetCount < 5) targetCount = 5;
@@ -62,18 +62,14 @@ class _TestScreenState extends State<TestScreen> {
     }
 
     final currentCard = _testCards[_currentIndex];
-
-    // [계획 2.2] 양방향 테스트: 질문 방향 무작위 결정
     _currentDirection = _random.nextBool()
         ? TestDirection.keywordToDescription
         : TestDirection.descriptionToKeyword;
 
-    // [계획 2.3] 선택지 개수 랜덤화: 4~6개 사이의 랜덤한 선택지 제공
-    int optionsCount = _random.nextInt(3) + 4; // 4, 5, 6 중 하나
+    int optionsCount = _random.nextInt(3) + 4;
 
     if (_currentDirection == TestDirection.keywordToDescription) {
       _correctAnswer = currentCard.description;
-      // 다른 카드들의 설명들 중에서 오답 추출
       List<String> others = _allCards
           .where((c) => c.id != currentCard.id)
           .map((c) => c.description)
@@ -82,7 +78,6 @@ class _TestScreenState extends State<TestScreen> {
       _currentOptions = [_correctAnswer, ...others.take(optionsCount - 1)];
     } else {
       _correctAnswer = currentCard.keyword;
-      // 다른 카드들의 키워드들 중에서 오답 추출
       List<String> others = _allCards
           .where((c) => c.id != currentCard.id)
           .map((c) => c.keyword)
@@ -109,7 +104,7 @@ class _TestScreenState extends State<TestScreen> {
   Future<void> _saveResults() async {
     final Map<String, CardItem> testMap = {for (var c in _testCards) c.id: c};
     final updatedAllCards = _allCards.map((c) => testMap[c.id] ?? c).toList();
-    await _storageService.saveProgress(updatedAllCards);
+    await _storageService.saveProgress(widget.assetPath, updatedAllCards);
   }
 
   @override
@@ -206,7 +201,6 @@ class _TestScreenState extends State<TestScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            // 선택지가 많아질 수 있으므로 스크롤 가능하게 처리
             ConstrainedBox(
               constraints: BoxConstraints(
                 maxHeight: MediaQuery.of(context).size.height * 0.45,

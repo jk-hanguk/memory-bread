@@ -4,7 +4,8 @@ import '../models/card_item.dart';
 import '../services/storage_service.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  final String assetPath;
+  const DashboardScreen({super.key, required this.assetPath});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -22,27 +23,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _loadData() async {
-    final cards = await _storageService.loadCards();
+    final cards = await _storageService.loadCards(widget.assetPath);
     setState(() {
       _cards = cards;
       _isLoading = false;
     });
   }
 
-  // 데이터 내보내기 (백업) - 현재는 콘솔 출력 및 간단한 다이얼로그로 구현
-  // 실제 파일 다운로드는 웹 라이브러리 추가 필요
   void _exportData() {
     final Map<String, dynamic> progressMap = {};
     for (var card in _cards) {
       progressMap[card.id] = card.toProgressJson();
     }
     final String jsonString = json.encode(progressMap);
-
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('데이터 백업'),
-        content: SingleChildScrollView(child: SelectableText(jsonString)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('데이터셋: ${widget.assetPath.split('/').last}'),
+            const SizedBox(height: 10),
+            const SelectableText('아래 내용을 복사하여 보관하세요:'),
+            const SizedBox(height: 10),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 200),
+              padding: const EdgeInsets.all(8),
+              color: Colors.grey[200],
+              child: SingleChildScrollView(child: SelectableText(jsonString)),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -61,15 +75,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     final int total = _cards.length;
     final int mastered = _cards.where((c) => c.stats.isMastered).length;
-    final int inProgress = _cards
-        .where((c) => c.stats.totalAttempts > 0 && !c.stats.isMastered)
-        .length;
-    final int notStarted = _cards
-        .where((c) => c.stats.totalAttempts == 0)
-        .length;
+    final int inProgress = _cards.where((c) => c.stats.totalAttempts > 0 && !c.stats.isMastered).length;
+    final int notStarted = _cards.where((c) => c.stats.totalAttempts == 0).length;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('학습 대시보드'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('학습 대시보드'),
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -77,9 +90,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _buildStatCard(
               context,
               '전체 진행도',
-              '${((mastered / total) * 100).toStringAsFixed(1)}%',
+              total > 0 ? '${((mastered / total) * 100).toStringAsFixed(1)}%' : '0%',
               LinearProgressIndicator(
-                value: mastered / total,
+                value: total > 0 ? mastered / total : 0,
                 minHeight: 10,
                 borderRadius: BorderRadius.circular(5),
               ),
@@ -93,45 +106,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
               crossAxisSpacing: 15,
               childAspectRatio: 1.2,
               children: [
-                _buildSummaryItem(
-                  context,
-                  '전체 항목',
-                  total.toString(),
-                  Colors.blue,
-                ),
-                _buildSummaryItem(
-                  context,
-                  '마스터',
-                  mastered.toString(),
-                  Colors.green,
-                ),
-                _buildSummaryItem(
-                  context,
-                  '학습 중',
-                  inProgress.toString(),
-                  Colors.orange,
-                ),
-                _buildSummaryItem(
-                  context,
-                  '미시작',
-                  notStarted.toString(),
-                  Colors.grey,
-                ),
+                _buildSummaryItem(context, '전체 항목', total.toString(), Colors.blue),
+                _buildSummaryItem(context, '마스터', mastered.toString(), Colors.green),
+                _buildSummaryItem(context, '학습 중', inProgress.toString(), Colors.orange),
+                _buildSummaryItem(context, '미시작', notStarted.toString(), Colors.grey),
               ],
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 20),
+            Text(
+              '분석 중인 데이터셋: ${widget.assetPath}',
+              style: Theme.of(context).textTheme.bodySmall,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
             const Divider(),
             const SizedBox(height: 20),
             ListTile(
               leading: const Icon(Icons.backup),
               title: const Text('데이터 백업 (JSON)'),
-              subtitle: const Text('현재 진행 상황을 텍스트로 내보냅니다.'),
+              subtitle: const Text('현재 데이터셋의 진행 상황을 내보냅니다.'),
               onTap: _exportData,
-            ),
-            const ListTile(
-              leading: Icon(Icons.restore),
-              title: Text('데이터 복구'),
-              subtitle: Text('백업된 데이터를 가져옵니다. (준비 중)'),
             ),
           ],
         ),
@@ -139,12 +133,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildStatCard(
-    BuildContext context,
-    String title,
-    String value,
-    Widget progress,
-  ) {
+  Widget _buildStatCard(BuildContext context, String title, String value, Widget progress) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -154,13 +143,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(title, style: Theme.of(context).textTheme.titleMedium),
-                Text(
-                  value,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
+                Text(value, style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                )),
               ],
             ),
             const SizedBox(height: 15),
@@ -171,12 +157,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildSummaryItem(
-    BuildContext context,
-    String label,
-    String count,
-    Color color,
-  ) {
+  Widget _buildSummaryItem(BuildContext context, String label, String count, Color color) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(15),
@@ -185,13 +166,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Text(label, style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 5),
-            Text(
-              count,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text(count, style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              color: color,
+              fontWeight: FontWeight.bold,
+            )),
           ],
         ),
       ),
