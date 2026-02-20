@@ -33,8 +33,6 @@ class _LearningScreenState extends State<LearningScreen> {
       return;
     }
 
-    // [수정] 동적 학습 문항 수 산출 (전체의 약 20% ~ 25% 수준)
-    // 청킹 전략을 고려하여 최소 5개, 최대 15개로 제한
     int totalCount = allCards.length;
     int targetCount = (totalCount * 0.25).floor();
     if (targetCount < 5) targetCount = 5;
@@ -42,12 +40,9 @@ class _LearningScreenState extends State<LearningScreen> {
     targetCount = min(targetCount, totalCount);
 
     final random = Random();
-    
-    // 마스터되지 않은 카드만 필터링
     final unmasteredCards = allCards.where((c) => !c.stats.isMastered).toList();
     
     if (unmasteredCards.isEmpty) {
-      // 모든 카드를 마스터한 경우 (복습 모드)
       allCards.shuffle(random);
       setState(() {
         _allMastered = true;
@@ -55,7 +50,6 @@ class _LearningScreenState extends State<LearningScreen> {
         _isLoading = false;
       });
     } else {
-      // 마스터되지 않은 카드 중 동적으로 산출된 개수만큼 무작위 선택
       unmasteredCards.shuffle(random);
       setState(() {
         _allMastered = false;
@@ -102,8 +96,8 @@ class _LearningScreenState extends State<LearningScreen> {
 
     if (_learningCards.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('학습')),
-        body: const Center(child: Text('학습할 카드가 없습니다.')),
+        appBar: AppBar(title: const Text('빵 먹기')),
+        body: const Center(child: Text('먹을 빵이 준비되지 않았어요.')),
       );
     }
 
@@ -112,29 +106,34 @@ class _LearningScreenState extends State<LearningScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('학습 (${_currentIndex + 1}/${_learningCards.length})'),
+        title: Text('빵 먹기 (${_currentIndex + 1}/${_learningCards.length})'),
         centerTitle: true,
       ),
       body: Center(
         child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (_allMastered)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 20.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   child: Chip(
-                    label: const Text('모든 카드를 마스터했습니다! (복습 모드)'),
-                    backgroundColor: Colors.green.withOpacity(0.1),
-                    labelStyle: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                    label: const Text('모든 빵을 다 소화했어요! 😋'),
+                    backgroundColor: const Color(0xFFC8E6C9),
+                    labelStyle: const TextStyle(color: Color(0xFF2E7D32), fontWeight: FontWeight.bold),
                   ),
                 )
               else
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 20.0),
+                  padding: const EdgeInsets.only(bottom: 24.0),
                   child: Text(
-                    '마스터하지 않은 카드 ${_learningCards.length}개를 학습합니다. 🍞',
-                    style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                    '꼭꼭 씹어서 맛있게 먹어보자! 🍞',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               FlashCard(
@@ -142,46 +141,50 @@ class _LearningScreenState extends State<LearningScreen> {
                 frontText: currentCard.keyword,
                 backText: currentCard.description,
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 50),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(
                     onPressed: _currentIndex > 0 ? _prevCard : null,
-                    icon: const Icon(Icons.arrow_back_ios),
-                    iconSize: 40,
+                    icon: const Icon(Icons.arrow_back_ios_rounded),
+                    iconSize: 48,
+                    color: const Color(0xFF8D6E63),
                   ),
-                  const SizedBox(width: 40),
+                  const SizedBox(width: 60),
                   IconButton(
                     onPressed: _currentIndex < _learningCards.length - 1 ? _nextCard : null,
-                    icon: const Icon(Icons.arrow_forward_ios),
-                    iconSize: 40,
+                    icon: const Icon(Icons.arrow_forward_ios_rounded),
+                    iconSize: 48,
+                    color: const Color(0xFF8D6E63),
                   ),
                 ],
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 50),
               if (isLastCard)
                 ElevatedButton.icon(
                   onPressed: _startTestWithCurrentCards,
-                  icon: const Icon(Icons.quiz),
-                  label: const Text('방금 학습한 내용 테스트하기'),
+                  icon: const Icon(Icons.celebration),
+                  label: const Text('꿀꺽! 다 먹었다! (소화 확인)'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    backgroundColor: const Color(0xFFE65100),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 )
               else
                 OutlinedButton.icon(
                   onPressed: _startTestWithCurrentCards,
-                  icon: const Icon(Icons.quiz),
-                  label: const Text('테스트 바로 시작 (중간 점검)'),
+                  icon: const Icon(Icons.flatware),
+                  label: const Text('지금 바로 소화 확인'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    side: const BorderSide(color: Color(0xFF8D6E63)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
                 ),
-              const SizedBox(height: 20),
-              Text(
-                '데이터셋: ${widget.assetPath.split('/').last}',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
             ],
           ),
         ),

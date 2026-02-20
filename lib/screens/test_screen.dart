@@ -41,7 +41,6 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   Future<void> _loadTestData() async {
-    // 오답 보기를 만들기 위해 전체 카드는 항상 필요
     _allCards = await _storageService.loadCards(widget.assetPath);
     if (_allCards.isEmpty) {
       setState(() => _isLoading = false);
@@ -49,11 +48,9 @@ class _TestScreenState extends State<TestScreen> {
     }
 
     if (widget.customCards != null && widget.customCards!.isNotEmpty) {
-      // [계획 2.1] 주입된 카드가 있으면 해당 카드들로 테스트 진행
       _testCards = List.from(widget.customCards!);
       _testCards.shuffle(_random);
     } else {
-      // 기존 방식: 무작위 추출
       int totalCount = _allCards.length;
       int targetCount = (totalCount * 0.25).floor();
       if (targetCount < 5) targetCount = 5;
@@ -129,33 +126,39 @@ class _TestScreenState extends State<TestScreen> {
 
     if (_testCards.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('테스트')),
-        body: const Center(child: Text('테스트할 데이터가 없습니다.')),
+        appBar: AppBar(title: const Text('소화 확인')),
+        body: const Center(child: Text('소화시킬 빵이 없어요.')),
       );
     }
 
     if (_isFinished) {
       return Scaffold(
-        appBar: AppBar(title: const Text('테스트 결과')),
+        appBar: AppBar(title: const Text('소화 결과')),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.emoji_events, size: 80, color: Colors.amber),
+              const Icon(Icons.sentiment_very_satisfied, size: 100, color: Color(0xFFE65100)),
               const SizedBox(height: 20),
-              Text(
-                '수고하셨습니다!',
-                style: Theme.of(context).textTheme.headlineMedium,
+              const Text(
+                '배부르게 다 소화했어요!',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF5D4037)),
               ),
               const SizedBox(height: 10),
               Text(
-                '점수: $_score / ${_testCards.length}',
-                style: Theme.of(context).textTheme.titleLarge,
+                '오늘의 소화 점수: $_score / ${_testCards.length}',
+                style: const TextStyle(fontSize: 18, color: Color(0xFF8D6E63)),
               ),
               const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('메인으로 돌아가기'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF8D6E63),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                child: const Text('맛있게 잘 먹었습니다!'),
               ),
             ],
           ),
@@ -165,15 +168,15 @@ class _TestScreenState extends State<TestScreen> {
 
     final currentCard = _testCards[_currentIndex];
     final String questionText = _currentDirection == TestDirection.keywordToDescription
-        ? '이 키워드의 설명은 무엇인가요?'
-        : '이 설명이 나타내는 키워드는 무엇인가요?';
+        ? '이 빵 조각의 맛은 무엇인가요?'
+        : '이 맛이 나는 빵 조각은 무엇인가요?';
     final String displayValue = _currentDirection == TestDirection.keywordToDescription
         ? currentCard.keyword
         : currentCard.description;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('테스트 (${_currentIndex + 1}/${_testCards.length})'),
+        title: Text('소화 확인 (${_currentIndex + 1}/${_testCards.length})'),
         centerTitle: true,
       ),
       body: Padding(
@@ -183,15 +186,18 @@ class _TestScreenState extends State<TestScreen> {
           children: [
             LinearProgressIndicator(
               value: _currentIndex / _testCards.length,
-              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              minHeight: 12,
+              backgroundColor: Colors.white,
+              color: const Color(0xFFFFB74D),
+              borderRadius: BorderRadius.circular(6),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
             Text(
               questionText,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF5D4037)),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Expanded(
               child: Center(
                 child: SingleChildScrollView(
@@ -199,25 +205,26 @@ class _TestScreenState extends State<TestScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(16),
+                      color: const Color(0xFFFFF3E0),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFFFCC80), width: 2),
                     ),
                     child: Text(
                       displayValue,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
+                            color: const Color(0xFF5D4037),
                           ),
                     ),
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
             ConstrainedBox(
               constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.45,
+                maxHeight: MediaQuery.of(context).size.height * 0.4,
               ),
               child: SingleChildScrollView(
                 child: Column(
@@ -226,9 +233,13 @@ class _TestScreenState extends State<TestScreen> {
                     padding: const EdgeInsets.only(bottom: 12.0),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFF5D4037),
+                        elevation: 1,
+                        side: const BorderSide(color: Color(0xFFFFE0B2)),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                       ),
                       onPressed: () => _handleAnswer(option),

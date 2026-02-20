@@ -15,18 +15,33 @@ class MemoryBreadApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '암기빵 (Memory Bread)',
+      title: '암기빵',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
+        // 식빵과 어울리는 따뜻한 색감 (베이지, 브라운, 오렌지)
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepOrange,
+          seedColor: const Color(0xFF8D6E63), // 부드러운 갈색 (식빵 테두리)
+          primary: const Color(0xFF6D4C41),
+          secondary: const Color(0xFFFFB74D), // 식빵 노란 빛
+          surface: const Color(0xFFFFF8E1), // 연한 베이지 (식빵 속살)
           brightness: Brightness.light,
+        ),
+        scaffoldBackgroundColor: const Color(0xFFFFF8E1),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFFFFF8E1),
+          surfaceTintColor: Colors.transparent,
+          titleTextStyle: TextStyle(
+            color: Color(0xFF5D4037),
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       darkTheme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepOrange,
+          seedColor: const Color(0xFF8D6E63),
           brightness: Brightness.dark,
         ),
       ),
@@ -62,7 +77,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // [계획 2.2] 실시간 통계 갱신 로직
   Future<void> _updateStats() async {
     if (_selectedDatasetPath == null) return;
     
@@ -79,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('암기빵 (Memory Bread)'),
+        title: const Text('암기빵'),
         centerTitle: true,
         actions: [
           if (_selectedDatasetPath != null)
@@ -90,10 +104,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     builder: (_) => DashboardScreen(assetPath: _selectedDatasetPath!),
                   ),
                 );
-                _updateStats(); // 대시보드 복귀 후 갱신
+                _updateStats();
               },
-              icon: const Icon(Icons.bar_chart),
-              tooltip: '상세 통계',
+              icon: const Icon(Icons.lunch_dining),
+              tooltip: '빵빵한 주머니 확인', // 더 귀여운 표현
             ),
         ],
       ),
@@ -103,19 +117,24 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.bakery_dining,
-                size: 80,
-                color: Colors.deepOrange,
-              ),
+                          const Icon(
+                            Icons.breakfast_dining, // 식빵 모양 아이콘으로 변경
+                            size: 100,
+                            color: Color(0xFF8D6E63),
+                          ),
+              
               const SizedBox(height: 10),
-              Text(
-                '암기를 도와드릴까요?',
-                style: Theme.of(context).textTheme.headlineSmall,
+              const Text(
+                '오늘도 배부르게 먹어보자! 🍞',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF5D4037),
+                ),
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 30),
               
-              // [계획 2.3] 진행 상황 섹션 UI
               if (_selectedDatasetPath != null) ...[
                 _buildProgressSection(),
                 const SizedBox(height: 30),
@@ -123,12 +142,14 @@ class _HomeScreenState extends State<HomeScreen> {
               
               ElevatedButton.icon(
                 onPressed: _selectDataset,
-                icon: const Icon(Icons.folder_open),
-                label: Text(_selectedDatasetPath == null ? '데이터셋 선택하기' : '데이터셋 변경하기'),
+                icon: const Icon(Icons.shopping_basket), // 빵 바구니에서 선택
+                label: Text(_selectedDatasetPath == null ? '무슨 빵을 먹을까? (데이터셋 선택)' : '다른 빵으로 바꿀래 (데이터셋 변경)'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-                  foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-                  minimumSize: const Size(double.infinity, 50),
+                  backgroundColor: const Color(0xFFFFCC80),
+                  foregroundColor: const Color(0xFF5D4037),
+                  minimumSize: const Size(double.infinity, 56),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 2,
                 ),
               ),
               const SizedBox(height: 16),
@@ -143,14 +164,16 @@ class _HomeScreenState extends State<HomeScreen> {
                             builder: (_) => LearningScreen(assetPath: _selectedDatasetPath!),
                           ),
                         );
-                        _updateStats(); // 학습 후 복귀 시 갱신
+                        _updateStats();
                       },
-                      icon: const Icon(Icons.school),
-                      label: const Text('학습 시작'),
+                      icon: const Icon(Icons.restaurant), // 학습 -> 식사 시작
+                      label: const Text('빵 먹기'),
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        backgroundColor: const Color(0xFF8D6E63),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 3,
                       ),
                     ),
                   ),
@@ -163,19 +186,25 @@ class _HomeScreenState extends State<HomeScreen> {
                             builder: (_) => TestScreen(assetPath: _selectedDatasetPath!),
                           ),
                         );
-                        _updateStats(); // 테스트 후 복귀 시 갱신
+                        _updateStats();
                       },
-                      icon: const Icon(Icons.quiz),
-                      label: const Text('테스트 시작'),
+                      icon: const Icon(Icons.flatware), // 테스트 -> 소화 확인
+                      label: const Text('소화 확인'),
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        side: const BorderSide(color: Color(0xFF8D6E63), width: 2),
+                        foregroundColor: const Color(0xFF5D4037),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 40),
-              const Text('학습할 데이터셋을 선택하고 암기를 시작하세요! 🍞'),
+              const Text(
+                '데이터셋 빵을 선택하고 맛있게 암기해 보세요! 🍞',
+                style: TextStyle(color: Color(0xFF8D6E63), fontSize: 13),
+              ),
             ],
           ),
         ),
@@ -185,12 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildProgressSection() {
     if (_isStatsLoading) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     final double progress = _totalCount > 0 ? _masteredCount / _totalCount : 0;
@@ -199,9 +223,16 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        color: const Color(0xFFFFF3E0),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFFFE0B2)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.brown.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,16 +242,16 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Expanded(
                 child: Text(
-                  fileName,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  '🍞 $fileName',
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF5D4037)),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               Text(
-                '${(progress * 100).toStringAsFixed(0)}%',
-                style: TextStyle(
+                '${(progress * 100).toStringAsFixed(0)}% 소화됨',
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Color(0xFFE65100),
                 ),
               ),
             ],
@@ -228,22 +259,25 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 12),
           LinearProgressIndicator(
             value: progress,
-            minHeight: 8,
-            borderRadius: BorderRadius.circular(4),
+            minHeight: 12,
+            backgroundColor: Colors.white,
+            color: const Color(0xFFFFB74D),
+            borderRadius: BorderRadius.circular(6),
           ),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '전체: $_totalCount개',
-                style: Theme.of(context).textTheme.bodySmall,
+                '전체: $_totalCount조각',
+                style: const TextStyle(color: Color(0xFF8D6E63), fontSize: 12),
               ),
               Text(
-                '마스터: $_masteredCount개',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.green,
+                '소화 완료: $_masteredCount조각',
+                style: const TextStyle(
+                  color: Color(0xFF2E7D32),
                   fontWeight: FontWeight.bold,
+                  fontSize: 12,
                 ),
               ),
             ],
