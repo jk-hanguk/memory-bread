@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/learning_screen.dart';
+import 'screens/test_screen.dart';
+import 'screens/dashboard_screen.dart';
 
 void main() {
   runApp(const MemoryBreadApp());
@@ -44,6 +46,17 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('암기빵 (Memory Bread)'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const DashboardScreen()),
+              );
+            },
+            icon: const Icon(Icons.dashboard),
+            tooltip: '대시보드',
+          ),
+        ],
       ),
       body: Center(
         child: Column(
@@ -73,8 +86,22 @@ class HomeScreen extends StatelessWidget {
                 textStyle: const TextStyle(fontSize: 18),
               ),
             ),
-            const SizedBox(height: 20),
-            const Text('곧 학습 데이터를 불러올 수 있게 될 거예요! 🍞'),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const TestScreen()),
+                );
+              },
+              icon: const Icon(Icons.quiz),
+              label: const Text('테스트 시작'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                textStyle: const TextStyle(fontSize: 18),
+              ),
+            ),
+            const SizedBox(height: 40),
+            const Text('학습한 내용을 확인해 보세요! 🍞'),
           ],
         ),
       ),
