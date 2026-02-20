@@ -1,10 +1,10 @@
 # 개발 단계별 계획 (Milestones) - 암기빵 (Memory Bread)
 
 ## 1단계: 프로젝트 초기화 및 환경 설정
-- [ ] Flutter Web 프로젝트 생성 및 초기화.
-- [ ] PWA 설정 (manifest.json, icons).
-- [ ] 기본 테마 (Material 3, 다크 모드) 설정.
-- [ ] GitHub Actions를 이용한 GitHub Pages 자동 배포 파이프라인 구축.
+- [x] Flutter Web 프로젝트 생성 및 초기화.
+- [x] PWA 설정 (manifest.json, icons).
+- [x] 기본 테마 (Material 3, 다크 모드) 설정.
+- [x] GitHub Actions를 이용한 GitHub Pages 자동 배포 파이프라인 구축.
 
 ## 2단계: 데이터 구조 및 로컬 저장소 구현
 - [ ] 기본 데이터 모델 (CardItem) 정의.
