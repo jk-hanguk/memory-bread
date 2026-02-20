@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'screens/learning_screen.dart';
 
 void main() {
   runApp(const MemoryBreadApp());
@@ -58,7 +59,21 @@ class HomeScreen extends StatelessWidget {
               '암기를 도와드릴까요?',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 40),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const LearningScreen()),
+                );
+              },
+              icon: const Icon(Icons.school),
+              label: const Text('학습 시작'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                textStyle: const TextStyle(fontSize: 18),
+              ),
+            ),
+            const SizedBox(height: 20),
             const Text('곧 학습 데이터를 불러올 수 있게 될 거예요! 🍞'),
           ],
         ),
