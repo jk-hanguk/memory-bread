@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/card_item.dart';
 import '../services/storage_service.dart';
 import '../widgets/flash_card.dart';
+import 'test_screen.dart';
 
 class LearningScreen extends StatefulWidget {
   final String assetPath;
@@ -52,6 +53,17 @@ class _LearningScreenState extends State<LearningScreen> {
     });
   }
 
+  void _startTestWithCurrentCards() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => TestScreen(
+          assetPath: widget.assetPath,
+          customCards: _learningCards,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -68,8 +80,7 @@ class _LearningScreenState extends State<LearningScreen> {
     }
 
     final currentCard = _learningCards[_currentIndex];
-    final String front = currentCard.keyword;
-    final String back = currentCard.description;
+    final bool isLastCard = _currentIndex == _learningCards.length - 1;
 
     return Scaffold(
       appBar: AppBar(
@@ -77,37 +88,57 @@ class _LearningScreenState extends State<LearningScreen> {
         centerTitle: true,
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            FlashCard(
-              key: ValueKey('${widget.assetPath}_${currentCard.id}'),
-              frontText: front,
-              backText: back,
-            ),
-            const SizedBox(height: 40),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  onPressed: _currentIndex > 0 ? _prevCard : null,
-                  icon: const Icon(Icons.arrow_back_ios),
-                  iconSize: 40,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FlashCard(
+                key: ValueKey('${widget.assetPath}_${currentCard.id}'),
+                frontText: currentCard.keyword,
+                backText: currentCard.description,
+              ),
+              const SizedBox(height: 40),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: _currentIndex > 0 ? _prevCard : null,
+                    icon: const Icon(Icons.arrow_back_ios),
+                    iconSize: 40,
+                  ),
+                  const SizedBox(width: 40),
+                  IconButton(
+                    onPressed: _currentIndex < _learningCards.length - 1 ? _nextCard : null,
+                    icon: const Icon(Icons.arrow_forward_ios),
+                    iconSize: 40,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30),
+              if (isLastCard)
+                ElevatedButton.icon(
+                  onPressed: _startTestWithCurrentCards,
+                  icon: const Icon(Icons.quiz),
+                  label: const Text('방금 학습한 내용 테스트하기'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                )
+              else
+                OutlinedButton.icon(
+                  onPressed: _startTestWithCurrentCards,
+                  icon: const Icon(Icons.quiz),
+                  label: const Text('테스트 바로 시작 (중간 점검)'),
                 ),
-                const SizedBox(width: 40),
-                IconButton(
-                  onPressed: _currentIndex < _learningCards.length - 1 ? _nextCard : null,
-                  icon: const Icon(Icons.arrow_forward_ios),
-                  iconSize: 40,
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Text(
-              '데이터셋: ${widget.assetPath.split('/').last}',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
+              const SizedBox(height: 20),
+              Text(
+                '데이터셋: ${widget.assetPath.split('/').last}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
         ),
       ),
     );

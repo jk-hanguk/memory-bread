@@ -14,7 +14,8 @@
 
 ## 2. 기술 스택 및 아키텍처
 
-- **Framework:** Flutter (Web/PWA)
+- **Framework:** Flutter 3.41.2 (Web/PWA)
+- **Asset Management:** Flutter 3.10+ 표준인 `AssetManifest` API를 사용하여 자산 목록을 관리합니다. 구형 방식(`AssetManifest.json` 직접 로드)은 지양합니다.
 - **State Management:** (필요 시 도입 예정, 현재는 기본 State 활용 가능)
 - **Data Model:** 
     - `CardItem`: 키워드, 설명, ID 등 정보를 포함.

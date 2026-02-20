@@ -7,7 +7,13 @@ enum TestDirection { keywordToDescription, descriptionToKeyword }
 
 class TestScreen extends StatefulWidget {
   final String assetPath;
-  const TestScreen({super.key, required this.assetPath});
+  final List<CardItem>? customCards;
+
+  const TestScreen({
+    super.key,
+    required this.assetPath,
+    this.customCards,
+  });
 
   @override
   State<TestScreen> createState() => _TestScreenState();
@@ -35,20 +41,28 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   Future<void> _loadTestData() async {
+    // 오답 보기를 만들기 위해 전체 카드는 항상 필요
     _allCards = await _storageService.loadCards(widget.assetPath);
     if (_allCards.isEmpty) {
       setState(() => _isLoading = false);
       return;
     }
 
-    int totalCount = _allCards.length;
-    int targetCount = (totalCount * 0.25).floor();
-    if (targetCount < 5) targetCount = 5;
-    if (targetCount > 10) targetCount = 10;
-    targetCount = min(targetCount, totalCount);
+    if (widget.customCards != null && widget.customCards!.isNotEmpty) {
+      // [계획 2.1] 주입된 카드가 있으면 해당 카드들로 테스트 진행
+      _testCards = List.from(widget.customCards!);
+      _testCards.shuffle(_random);
+    } else {
+      // 기존 방식: 무작위 추출
+      int totalCount = _allCards.length;
+      int targetCount = (totalCount * 0.25).floor();
+      if (targetCount < 5) targetCount = 5;
+      if (targetCount > 10) targetCount = 10;
+      targetCount = min(targetCount, totalCount);
 
-    _allCards.shuffle(_random);
-    _testCards = _allCards.take(targetCount).toList();
+      _allCards.shuffle(_random);
+      _testCards = _allCards.take(targetCount).toList();
+    }
 
     _generateNextQuestion();
     setState(() => _isLoading = false);
