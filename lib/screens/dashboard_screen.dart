@@ -111,7 +111,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 _buildSummaryItem(context, '총 식량', total.toString(), const Color(0xFF5D4037)),
                 _buildSummaryItem(context, '완전 소화', mastered.toString(), const Color(0xFF2E7D32)),
                 _buildSummaryItem(context, '냠냠 중', inProgress.toString(), const Color(0xFFE65100)),
-                _buildSummaryItem(context, '미시작', notStarted.toString(), Colors.grey),
+                _buildSummaryItem(context, '아직 바구니에', notStarted.toString(), Colors.grey),
               ],
             ),
             const SizedBox(height: 20),

@@ -25,6 +25,7 @@ class _TestScreenState extends State<TestScreen> {
 
   List<CardItem> _allCards = [];
   List<CardItem> _testCards = [];
+  final List<CardItem> _wrongCards = []; // 오답 리스트 추가
   int _currentIndex = 0;
   int _score = 0;
   bool _isLoading = true;
@@ -102,7 +103,12 @@ class _TestScreenState extends State<TestScreen> {
 
   void _handleAnswer(String selectedOption) {
     bool isCorrect = selectedOption == _correctAnswer;
-    if (isCorrect) _score++;
+    if (isCorrect) {
+      _score++;
+    } else {
+      // 오답 시 리스트에 추가
+      _wrongCards.add(_testCards[_currentIndex]);
+    }
 
     _testCards[_currentIndex].stats.updateResult(isCorrect);
 
@@ -116,6 +122,22 @@ class _TestScreenState extends State<TestScreen> {
     final Map<String, CardItem> testMap = {for (var c in _testCards) c.id: c};
     final updatedAllCards = _allCards.map((c) => testMap[c.id] ?? c).toList();
     await _storageService.saveProgress(widget.assetPath, updatedAllCards);
+  }
+
+  // 점수대별 메시지 및 아이콘 가져오기
+  Map<String, dynamic> _getResultInfo() {
+    double ratio = _testCards.isEmpty ? 0 : _score / _testCards.length;
+    if (ratio >= 1.0) {
+      return {'msg': '꺼억~ 완벽히 소화!! 🍞✨', 'icon': Icons.sentiment_very_satisfied, 'color': Colors.green};
+    } else if (ratio >= 0.8) {
+      return {'msg': '기분 좋은 식사! 😋', 'icon': Icons.sentiment_satisfied_alt, 'color': Colors.lightGreen};
+    } else if (ratio >= 0.5) {
+      return {'msg': '배가 좀 고픈데~ 꼬르륵.. 🥣', 'icon': Icons.sentiment_neutral, 'color': Colors.orange};
+    } else if (ratio >= 0.2) {
+      return {'msg': '소화불량~ 배가 아프다! 🤢', 'icon': Icons.sentiment_dissatisfied, 'color': Colors.redAccent};
+    } else {
+      return {'msg': '응급상황! 배탈! 배탈!! 🚑', 'icon': Icons.sentiment_very_dissatisfied, 'color': Colors.red};
+    }
   }
 
   @override
@@ -132,36 +154,84 @@ class _TestScreenState extends State<TestScreen> {
     }
 
     if (_isFinished) {
+      final info = _getResultInfo();
       return Scaffold(
-        appBar: AppBar(title: const Text('소화 결과')),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.sentiment_very_satisfied, size: 100, color: Color(0xFFE65100)),
-              const SizedBox(height: 20),
-              const Text(
-                '배부르게 다 소화했어요!',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF5D4037)),
+        appBar: AppBar(title: const Text('소화 결과'), centerTitle: true),
+        body: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    Icon(info['icon'], size: 100, color: info['color']),
+                    const SizedBox(height: 20),
+                    Text(
+                      info['msg'],
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF5D4037)),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      '소화한 빵: $_score / ${_testCards.length} 조각',
+                      style: const TextStyle(fontSize: 18, color: Color(0xFF8D6E63)),
+                    ),
+                    const SizedBox(height: 30),
+                    
+                    if (_wrongCards.isNotEmpty) ...[
+                      const Divider(height: 40),
+                      Row(
+                        children: const [
+                          Icon(Icons.shopping_basket, color: Colors.brown, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            '잘못 먹은 빵들 (오답 노트)',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF5D4037)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _wrongCards.length,
+                        itemBuilder: (context, index) {
+                          final card = _wrongCards[index];
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            color: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(color: Colors.red.withOpacity(0.2)),
+                            ),
+                            child: ListTile(
+                              leading: const Icon(Icons.close, color: Colors.red),
+                              title: Text(card.keyword, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              subtitle: Text(card.description, style: const TextStyle(fontSize: 13)),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ],
+                ),
               ),
-              const SizedBox(height: 10),
-              Text(
-                '오늘의 소화 점수: $_score / ${_testCards.length}',
-                style: const TextStyle(fontSize: 18, color: Color(0xFF8D6E63)),
-              ),
-              const SizedBox(height: 40),
-              ElevatedButton(
+            ),
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF8D6E63),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                  minimumSize: const Size(double.infinity, 56),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                child: const Text('맛있게 잘 먹었습니다!'),
+                child: const Text('또 먹으러 가자~', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
     }
