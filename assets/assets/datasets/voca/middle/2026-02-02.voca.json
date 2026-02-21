@@ -1,0 +1,12 @@
+[
+  {"id": "voca_mid_011", "keyword": "Knowledge", "description": "지식, 알고 있음"},
+  {"id": "voca_mid_012", "keyword": "Language", "description": "언어, 말"},
+  {"id": "voca_mid_013", "keyword": "Message", "description": "메시지, 전갈"},
+  {"id": "voca_mid_014", "keyword": "Nature", "description": "자연, 본성"},
+  {"id": "voca_mid_015", "keyword": "Opportunity", "description": "기회"},
+  {"id": "voca_mid_016", "keyword": "Patient", "description": "환자, 인내심 있는"},
+  {"id": "voca_mid_017", "keyword": "Quality", "description": "질, 특성"},
+  {"id": "voca_mid_018", "keyword": "Respect", "description": "존경, 존중"},
+  {"id": "voca_mid_019", "keyword": "Success", "description": "성공"},
+  {"id": "voca_mid_020", "keyword": "Traffic", "description": "교통, 통행"}
+]
