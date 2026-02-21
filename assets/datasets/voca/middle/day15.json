@@ -1,0 +1,152 @@
+[
+  {
+    "id": "word_0421",
+    "keyword": "journey",
+    "description": "[명] 여행, 여정"
+  },
+  {
+    "id": "word_0422",
+    "keyword": "tip",
+    "description": "[명] 1. 팁, 봉사료 2. 조언 3. 끝부분"
+  },
+  {
+    "id": "word_0423",
+    "keyword": "baggage",
+    "description": "[명] 수하물"
+  },
+  {
+    "id": "word_0424",
+    "keyword": "landscape",
+    "description": "[명] 1. 풍경, 경치 2. 풍경화"
+  },
+  {
+    "id": "word_0425",
+    "keyword": "sightseeing",
+    "description": "[명] 관광, 구경 [형] 관광의"
+  },
+  {
+    "id": "word_0426",
+    "keyword": "passport",
+    "description": "[명] 여권"
+  },
+  {
+    "id": "word_0427",
+    "keyword": "cabin",
+    "description": "[명] 1. (항공기·배의) 객실, 선실 2. 오두막집"
+  },
+  {
+    "id": "word_0428",
+    "keyword": "foreigner",
+    "description": "[명] 외국인"
+  },
+  {
+    "id": "word_0429",
+    "keyword": "allow",
+    "description": "[동] 허락하다, 허용하다"
+  },
+  {
+    "id": "word_0430",
+    "keyword": "crowded",
+    "description": "[형] 혼잡한, 붐비는"
+  },
+  {
+    "id": "word_0431",
+    "keyword": "platform",
+    "description": "[명] 1. 승강장, 플랫폼 2. 단, 연단"
+  },
+  {
+    "id": "word_0432",
+    "keyword": "abroad",
+    "description": "[부] 1. 해외에, 해외로 2. 널리"
+  },
+  {
+    "id": "word_0433",
+    "keyword": "aisle",
+    "description": "[명] 통로, 복도"
+  },
+  {
+    "id": "word_0434",
+    "keyword": "souvenir",
+    "description": "[명] 기념품"
+  },
+  {
+    "id": "word_0435",
+    "keyword": "lighthouse",
+    "description": "[명] 등대"
+  },
+  {
+    "id": "word_0436",
+    "keyword": "depart",
+    "description": "[동] 떠나다, 출발하다"
+  },
+  {
+    "id": "word_0437",
+    "keyword": "underground",
+    "description": "[형] 지하의 [부] 지하에, 지하로"
+  },
+  {
+    "id": "word_0438",
+    "keyword": "recreation",
+    "description": "[명] 1. 기분 전환, 휴양 2. 오락, 레크리에이션"
+  },
+  {
+    "id": "word_0439",
+    "keyword": "highway",
+    "description": "[명] 고속도로"
+  },
+  {
+    "id": "word_0440",
+    "keyword": "check out",
+    "description": "1. (호텔에서) 체크아웃하다, 나가다 2. 확인하다, 조사하다"
+  },
+  {
+    "id": "word_0441",
+    "keyword": "direction",
+    "description": "[명] 1. 방향 2. 위치, 지역"
+  },
+  {
+    "id": "word_0442",
+    "keyword": "transport",
+    "description": "[동] 수송하다, 옮기다 [명] 수송, 운송"
+  },
+  {
+    "id": "word_0443",
+    "keyword": "reserve",
+    "description": "[동] 1. 예약하다 2. 비축하다, 남겨두다"
+  },
+  {
+    "id": "word_0444",
+    "keyword": "overseas",
+    "description": "[형] 해외의 [부] 해외에"
+  },
+  {
+    "id": "word_0445",
+    "keyword": "brochure",
+    "description": "[명] 책자, 브로슈어"
+  },
+  {
+    "id": "word_0446",
+    "keyword": "available",
+    "description": "[형] 이용할 수 있는, 쓸모 있는"
+  },
+  {
+    "id": "word_0447",
+    "keyword": "delay",
+    "description": "[동] 지연시키다, 연기하다 [명] 지연, 연기"
+  },
+  {
+    "id": "word_0448",
+    "keyword": "voyage",
+    "description": "[명] 항해, 여행"
+  },
+  {
+    "id": "word_0449",
+    "keyword": "come to mind",
+    "description": "생각이 나다, 떠오르다"
+  },
+  {
+    "id": "word_0450",
+    "keyword": "supposed to",
+    "description": "1. ~하기로 되어 있는 2. ~인 것으로 여겨지는"
+  }
+]
