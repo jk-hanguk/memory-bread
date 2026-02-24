@@ -3,6 +3,7 @@ import 'screens/learning_screen.dart';
 import 'screens/test_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/dataset_browser_screen.dart';
+import 'screens/bakery_screen.dart';
 import 'services/storage_service.dart';
 
 void main() {
@@ -145,7 +146,27 @@ class _HomeScreenState extends State<HomeScreen> {
                   elevation: 2,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
+              
+              // 빵가게 버튼 추가
+              ElevatedButton.icon(
+                onPressed: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const BakeryScreen()),
+                  );
+                  // 빵가게에서 돌아오면 데이터셋 목록이 갱신되었을 수 있으므로 필요시 처리
+                },
+                icon: const Icon(Icons.storefront),
+                label: const Text('새로운 빵 사러 가기 (빵가게)'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF9575CD), // 보라색으로 차별화
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 56),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 2,
+                ),
+              ),
+              const SizedBox(height: 20),
               
               Row(
                 children: [

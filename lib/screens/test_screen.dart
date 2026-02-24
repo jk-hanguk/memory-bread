@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../models/card_item.dart';
 import '../services/storage_service.dart';
+import '../widgets/latex_text.dart';
 
 enum TestDirection { keywordToDescription, descriptionToKeyword }
 
@@ -207,8 +208,18 @@ class _TestScreenState extends State<TestScreen> {
                             ),
                             child: ListTile(
                               leading: const Icon(Icons.close, color: Colors.red),
-                              title: Text(card.keyword, style: const TextStyle(fontWeight: FontWeight.bold)),
-                              subtitle: Text(card.description, style: const TextStyle(fontSize: 13)),
+                              title: LatexText(
+                                text: card.keyword, 
+                                textAlign: TextAlign.left,
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                                mathFontSize: 16,
+                              ),
+                              subtitle: LatexText(
+                                text: card.description, 
+                                textAlign: TextAlign.left,
+                                style: const TextStyle(fontSize: 13),
+                                mathFontSize: 14,
+                              ),
                             ),
                           );
                         },
@@ -279,13 +290,14 @@ class _TestScreenState extends State<TestScreen> {
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: const Color(0xFFFFCC80), width: 2),
                     ),
-                    child: Text(
-                      displayValue,
+                    child: LatexText(
+                      text: displayValue,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: const Color(0xFF5D4037),
                           ),
+                      mathFontSize: 24,
                     ),
                   ),
                 ),
@@ -313,10 +325,11 @@ class _TestScreenState extends State<TestScreen> {
                         ),
                       ),
                       onPressed: () => _handleAnswer(option),
-                      child: Text(
-                        option,
+                      child: LatexText(
+                        text: option,
                         textAlign: TextAlign.center,
                         style: const TextStyle(fontSize: 16),
+                        mathFontSize: 18,
                       ),
                     ),
                   )).toList(),

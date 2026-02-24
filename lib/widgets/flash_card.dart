@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'latex_text.dart';
 
 class FlashCard extends StatefulWidget {
   final String frontText;
@@ -82,12 +83,12 @@ class _FlashCardState extends State<FlashCard>
         height: 200,
         alignment: Alignment.center,
         padding: const EdgeInsets.all(20),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+        child: LatexText(
+          text: text,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+          mathFontSize: 24,
         ),
       ),
     );

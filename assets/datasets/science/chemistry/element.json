@@ -1,52 +1,52 @@
 [
   {
     "id": "chem_001",
-    "keyword": "H2",
+    "keyword": "$H_2$",
     "description": "수소"
   },
   {
     "id": "chem_002",
-    "keyword": "He",
+    "keyword": "$He$",
     "description": "헬륨"
   },
   {
     "id": "chem_003",
-    "keyword": "Li",
+    "keyword": "$Li$",
     "description": "리튬"
   },
   {
     "id": "chem_004",
-    "keyword": "Be",
+    "keyword": "$Be$",
     "description": "베릴륨"
   },
   {
     "id": "chem_005",
-    "keyword": "B",
+    "keyword": "$B$",
     "description": "붕소"
   },
   {
     "id": "chem_006",
-    "keyword": "C",
+    "keyword": "$C$",
     "description": "탄소"
   },
   {
     "id": "chem_007",
-    "keyword": "N",
+    "keyword": "$N_2$",
     "description": "질소"
   },
   {
     "id": "chem_008",
-    "keyword": "O",
+    "keyword": "$O_2$",
     "description": "산소"
   },
   {
     "id": "chem_009",
-    "keyword": "F",
+    "keyword": "$F_2$",
     "description": "플루오린"
   },
   {
     "id": "chem_010",
-    "keyword": "Ne",
+    "keyword": "$Ne$",
     "description": "네온"
   }
 ]
