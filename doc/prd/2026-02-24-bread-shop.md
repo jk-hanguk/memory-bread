@@ -44,25 +44,26 @@
 
 ## 4. 개발 단계 (Development Phases)
 
-### Phase 1: 기반 구축 (Foundation)
-- [ ] GitHub API 연동 서비스 구현 (`BakeryService`).
-- [ ] 특정 리포지토리의 루트 폴더(코너) 목록 가져오기 로직 개발.
-- [ ] 단일 JSON 파일 다운로드 및 로컬 저장 기능.
+### Phase 1: 기반 구축 (Foundation) [완료]
+- [x] GitHub API 연동 서비스 구현 (`BakeryService`).
+- [x] 특정 리포지토리의 루트 폴더(코너) 목록 가져오기 로직 개발.
+- [x] 단일 JSON 파일 다운로드 및 로컬 저장 기능.
 
-### Phase 2: 빵가게 UI (Bakery UI)
-- [ ] `BakeryScreen` (빵가게 메인) 구현: 코너 리스트 표시.
-- [ ] `CornerDetailScreen`: 코너 내부의 빵(파일) 목록 표시.
-- [ ] 빵별 상태 표시 (새로운 빵, 이미 가진 빵, 업데이트 필요).
+### Phase 2: 빵가게 UI (Bakery UI) [완료]
+- [x] `BakeryScreen` (빵가게 메인) 구현: 코너 리스트 표시.
+- [x] `CornerDetailScreen`: 코너 내부의 빵(파일) 및 하위 디렉토리 탐색 기능.
+- [x] 빵별 상태 표시 (이미 가진 빵 구분).
 
-### Phase 3: 관리 및 동기화 (Management)
-- [ ] 로컬 저장소 확장: 외부에서 가져온 빵들을 `DatasetBrowser`에서 함께 표시.
-- [ ] 중복 체크 및 데이터 갱신(Update) 로직 구현.
-- [ ] 저장 용량 관리 (다운로드한 빵 삭제 기능).
+### Phase 3: 관리 및 동기화 (Management) [완료]
+- [x] 로컬 저장소 확장: 외부에서 가져온 빵들을 `DatasetBrowser`에서 함께 표시.
+- [x] 중복 체크 및 실제 이름(Metadata) 기반 표시 로직 구현.
+- [x] 빵 삭제 기능 (BakeryService 내 구현).
 
-### Phase 4: 고도화 (Polishing)
-- [ ] `corner.json` 기반의 커스텀 테마(색상, 아이콘) 반영.
-- [ ] 검색 기능 추가.
-- [ ] 오프라인 모드 대응 (이미 다운로드한 빵은 네트워크 없이 목록 노출).
+### Phase 4: 고도화 (Polishing) [진행 중]
+- [x] LaTeX 수식 렌더링 공통 위젯(`LatexText`) 적용 및 레이아웃 최적화.
+- [x] 학습 방향 랜덤화 (키워드<->설명 양방향 학습).
+- [ ] `corner.json` 기반의 커스텀 테마 반영.
+- [ ] 데이터 갱신(Update) 체크 로직 정교화.
 
 ---
 

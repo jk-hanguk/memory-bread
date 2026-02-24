@@ -16,6 +16,7 @@ class LearningScreen extends StatefulWidget {
 class _LearningScreenState extends State<LearningScreen> {
   final StorageService _storageService = StorageService();
   List<CardItem> _learningCards = [];
+  List<bool> _isFlippedList = []; // 각 카드가 뒤집혔는지(설명->키워드) 여부
   int _currentIndex = 0;
   bool _isLoading = true;
   bool _allMastered = false;
@@ -42,21 +43,25 @@ class _LearningScreenState extends State<LearningScreen> {
     final random = Random();
     final unmasteredCards = allCards.where((c) => !c.stats.isMastered).toList();
     
+    List<CardItem> selectedCards;
     if (unmasteredCards.isEmpty) {
       allCards.shuffle(random);
-      setState(() {
-        _allMastered = true;
-        _learningCards = allCards.take(targetCount).toList();
-        _isLoading = false;
-      });
+      selectedCards = allCards.take(targetCount).toList();
+      setState(() => _allMastered = true);
     } else {
       unmasteredCards.shuffle(random);
-      setState(() {
-        _allMastered = false;
-        _learningCards = unmasteredCards.take(targetCount).toList();
-        _isLoading = false;
-      });
+      selectedCards = unmasteredCards.take(targetCount).toList();
+      setState(() => _allMastered = false);
     }
+
+    // 각 카드마다 50% 확률로 앞뒤를 바꿈
+    final flippedList = selectedCards.map((_) => random.nextBool()).toList();
+
+    setState(() {
+      _learningCards = selectedCards;
+      _isFlippedList = flippedList;
+      _isLoading = false;
+    });
   }
 
   void _nextCard() {
@@ -102,7 +107,12 @@ class _LearningScreenState extends State<LearningScreen> {
     }
 
     final currentCard = _learningCards[_currentIndex];
+    final bool isFlipped = _isFlippedList[_currentIndex];
     final bool isLastCard = _currentIndex == _learningCards.length - 1;
+
+    final String frontText = isFlipped ? currentCard.description : currentCard.keyword;
+    final String backText = isFlipped ? currentCard.keyword : currentCard.description;
+    final String hintText = isFlipped ? '💡 [맛]을 보고 [빵]을 맞춰보세요' : '💡 [빵]을 보고 [맛]을 떠올려보세요';
 
     return Scaffold(
       appBar: AppBar(
@@ -126,7 +136,7 @@ class _LearningScreenState extends State<LearningScreen> {
                 )
               else
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 24.0),
+                  padding: const EdgeInsets.only(bottom: 8.0),
                   child: Text(
                     '꼭꼭 씹어서 맛있게 먹어보자! 🍞',
                     style: TextStyle(
@@ -136,10 +146,15 @@ class _LearningScreenState extends State<LearningScreen> {
                     ),
                   ),
                 ),
+              Text(
+                hintText,
+                style: TextStyle(color: Colors.brown.withValues(alpha: 0.6), fontSize: 13),
+              ),
+              const SizedBox(height: 16),
               FlashCard(
-                key: ValueKey('${widget.assetPath}_${currentCard.id}'),
-                frontText: currentCard.keyword,
-                backText: currentCard.description,
+                key: ValueKey('${widget.assetPath}_${currentCard.id}_$isFlipped'),
+                frontText: frontText,
+                backText: backText,
               ),
               const SizedBox(height: 50),
               Row(

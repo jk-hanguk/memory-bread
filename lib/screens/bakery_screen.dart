@@ -166,11 +166,21 @@ class _CornerDetailScreenState extends State<CornerDetailScreen> {
 
   Future<void> _loadBreads() async {
     setState(() => _isLoading = true);
-    final contents = await _bakeryService.fetchContents(widget.path);
-    setState(() {
-      _breads = contents.where((c) => c['type'] == 'file' && c['name'].endsWith('.json')).toList();
-      _isLoading = false;
-    });
+    try {
+      final contents = await _bakeryService.fetchContents(widget.path);
+      final purchased = await _bakeryService.getPurchasedBreadIds();
+      setState(() {
+        _breads = contents.where((c) => 
+          (c['type'] == 'file' && c['name'].endsWith('.json')) || 
+          c['type'] == 'dir'
+        ).toList();
+        _purchasedIds = purchased;
+        _isLoading = false;
+      });
+    } catch (e) {
+      developer.log('Error loading breads: $e', name: 'BakeryScreen');
+      setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _purchaseBread(dynamic bread) async {
@@ -210,27 +220,52 @@ class _CornerDetailScreenState extends State<CornerDetailScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _breads.length,
-              itemBuilder: (context, index) {
-                final bread = _breads[index];
-                final name = bread['name'];
-                final id = bread['sha'];
-                final isPurchased = _purchasedIds.contains(id);
+          : _breads.isEmpty
+              ? const Center(child: Text('진열된 빵이 없습니다.'))
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _breads.length,
+                  itemBuilder: (context, index) {
+                    final item = _breads[index];
+                    final name = item['name'];
+                    final type = item['type'];
 
-                return ListTile(
-                  leading: const Icon(Icons.breakfast_dining),
-                  title: Text(name),
-                  trailing: isPurchased
-                      ? const Chip(label: Text('가진 빵'), backgroundColor: Colors.greenAccent)
-                      : ElevatedButton(
-                          onPressed: () => _purchaseBread(bread),
-                          child: const Text('담기'),
-                        ),
-                );
-              },
-            ),
+                    if (type == 'dir') {
+                      return ListTile(
+                        leading: const Icon(Icons.folder, color: Colors.amber),
+                        title: Text(name),
+                        subtitle: const Text('하위 코너 보기'),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => CornerDetailScreen(
+                                cornerName: name,
+                                path: item['path'],
+                                purchasedIds: widget.purchasedIds,
+                                onUpdate: widget.onUpdate,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    }
+
+                    final id = item['sha'];
+                    final isPurchased = _purchasedIds.contains(id);
+
+                    return ListTile(
+                      leading: const Icon(Icons.breakfast_dining),
+                      title: Text(name),
+                      trailing: isPurchased
+                          ? const Chip(label: Text('가진 빵'), backgroundColor: Colors.greenAccent)
+                          : ElevatedButton(
+                              onPressed: () => _purchaseBread(item),
+                              child: const Text('담기'),
+                            ),
+                    );
+                  },
+                ),
     );
   }
 }

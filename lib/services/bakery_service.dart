@@ -4,10 +4,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:developer' as developer;
 
 class BakeryService {
-  // 기본 데이터 저장소 (추후 사용자 설정 가능하게 확장)
-  final String owner = 'memory-bread';
-  final String repo = 'bakery';
+  // 기본 데이터 저장소
+  final String owner = 'jk-hanguk';
+  final String repo = 'bread-shop';
   final String branch = 'main';
+  final String rootPath = 'bread_corner';
 
   static const String _purchasedBreadsKey = 'memory_bread_purchased_list';
   static const String _breadDataPrefix = 'memory_bread_data_';
@@ -15,7 +16,8 @@ class BakeryService {
 
   /// GitHub API를 통해 특정 경로의 파일/폴더 목록을 가져옵니다.
   Future<List<dynamic>> fetchContents(String path) async {
-    final url = Uri.parse('https://api.github.com/repos/$owner/$repo/contents/$path?ref=$branch');
+    final String targetPath = path.isEmpty ? rootPath : path;
+    final url = Uri.parse('https://api.github.com/repos/$owner/$repo/contents/$targetPath?ref=$branch');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {

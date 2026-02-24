@@ -204,7 +204,7 @@ class _TestScreenState extends State<TestScreen> {
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
-                              side: BorderSide(color: Colors.red.withOpacity(0.2)),
+                              side: BorderSide(color: Colors.red.withValues(alpha: 0.2)),
                             ),
                             child: ListTile(
                               leading: const Icon(Icons.close, color: Colors.red),
@@ -290,14 +290,17 @@ class _TestScreenState extends State<TestScreen> {
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: const Color(0xFFFFCC80), width: 2),
                     ),
-                    child: LatexText(
-                      text: displayValue,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF5D4037),
-                          ),
-                      mathFontSize: 24,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: LatexText(
+                        text: displayValue,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF5D4037),
+                            ),
+                        mathFontSize: 24,
+                      ),
                     ),
                   ),
                 ),
@@ -325,11 +328,14 @@ class _TestScreenState extends State<TestScreen> {
                         ),
                       ),
                       onPressed: () => _handleAnswer(option),
-                      child: LatexText(
-                        text: option,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 16),
-                        mathFontSize: 18,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: LatexText(
+                          text: option,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 16),
+                          mathFontSize: 18,
+                        ),
                       ),
                     ),
                   )).toList(),

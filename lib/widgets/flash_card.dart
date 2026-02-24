@@ -72,6 +72,8 @@ class _FlashCardState extends State<FlashCard>
   }
 
   Widget _buildCardSide(String text, {required bool isFront}) {
+    final size = MediaQuery.of(context).size;
+    
     return Card(
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -79,16 +81,24 @@ class _FlashCardState extends State<FlashCard>
           ? Theme.of(context).colorScheme.primaryContainer
           : Theme.of(context).colorScheme.secondaryContainer,
       child: Container(
-        width: 300,
-        height: 200,
+        constraints: BoxConstraints(
+          minWidth: min(size.width * 0.85, 300),
+          maxWidth: size.width * 0.9,
+          minHeight: 220,
+          maxHeight: size.height * 0.45,
+        ),
         alignment: Alignment.center,
-        padding: const EdgeInsets.all(20),
-        child: LatexText(
-          text: text,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
+        padding: const EdgeInsets.all(24),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: LatexText(
+            text: text,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF5D4037),
+            ),
+            mathFontSize: 24,
           ),
-          mathFontSize: 24,
         ),
       ),
     );

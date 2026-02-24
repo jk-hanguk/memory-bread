@@ -5,6 +5,7 @@ import 'screens/dashboard_screen.dart';
 import 'screens/dataset_browser_screen.dart';
 import 'screens/bakery_screen.dart';
 import 'services/storage_service.dart';
+import 'services/bakery_service.dart';
 
 void main() {
   runApp(const MemoryBreadApp());
@@ -54,7 +55,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final StorageService _storageService = StorageService();
+  final BakeryService _bakeryService = BakeryService();
   String? _selectedDatasetPath;
+  String? _selectedDatasetName;
   int _totalCount = 0;
   int _masteredCount = 0;
   bool _isStatsLoading = false;
@@ -75,8 +78,19 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_selectedDatasetPath == null) return;
     
     setState(() => _isStatsLoading = true);
+    
+    // 이름 결정
+    String displayName;
+    if (_selectedDatasetPath!.startsWith('bakery://')) {
+      final id = _selectedDatasetPath!.replaceFirst('bakery://', '');
+      displayName = await _bakeryService.getBreadName(id);
+    } else {
+      displayName = _selectedDatasetPath!.split('/').last;
+    }
+
     final cards = await _storageService.loadCards(_selectedDatasetPath!);
     setState(() {
+      _selectedDatasetName = displayName;
       _totalCount = cards.length;
       _masteredCount = cards.where((c) => c.stats.isMastered).length;
       _isStatsLoading = false;
@@ -168,49 +182,40 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 20),
               
-              Row(
+              // 핵심 기능 버튼 (빵 먹기 / 소화 확인) 강조 디자인
+              Column(
                 children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _selectedDatasetPath == null ? null : () async {
-                        await Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => LearningScreen(assetPath: _selectedDatasetPath!),
-                          ),
-                        );
-                        _updateStats();
-                      },
-                      icon: const Icon(Icons.restaurant), // 학습 -> 식사 시작
-                      label: const Text('빵 먹기'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                        backgroundColor: const Color(0xFF8D6E63),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        elevation: 3,
-                      ),
-                    ),
+                  _buildMajorActionButton(
+                    context: context,
+                    title: '빵 먹기 (학습)',
+                    subtitle: '꼭꼭 씹어서 머릿속에 저장해요',
+                    icon: Icons.restaurant,
+                    color: const Color(0xFF8D6E63),
+                    onPressed: _selectedDatasetPath == null ? null : () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => LearningScreen(assetPath: _selectedDatasetPath!),
+                        ),
+                      );
+                      _updateStats();
+                    },
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: _selectedDatasetPath == null ? null : () async {
-                        await Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => TestScreen(assetPath: _selectedDatasetPath!),
-                          ),
-                        );
-                        _updateStats();
-                      },
-                      icon: const Icon(Icons.flatware), // 테스트 -> 소화 확인
-                      label: const Text('소화 확인'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                        side: const BorderSide(color: Color(0xFF8D6E63), width: 2),
-                        foregroundColor: const Color(0xFF5D4037),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                    ),
+                  const SizedBox(height: 16),
+                  _buildMajorActionButton(
+                    context: context,
+                    title: '소화 확인 (테스트)',
+                    subtitle: '얼마나 잘 외웠는지 확인해 볼까요?',
+                    icon: Icons.flatware,
+                    color: const Color(0xFFE65100),
+                    isOutlined: true,
+                    onPressed: _selectedDatasetPath == null ? null : () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => TestScreen(assetPath: _selectedDatasetPath!),
+                        ),
+                      );
+                      _updateStats();
+                    },
                   ),
                 ],
               ),
@@ -226,13 +231,94 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildMajorActionButton({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback? onPressed,
+    bool isOutlined = false,
+  }) {
+    final bool isDisabled = onPressed == null;
+    
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(24),
+      child: Opacity(
+        opacity: isDisabled ? 0.5 : 1.0,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+          decoration: BoxDecoration(
+            color: isOutlined ? Colors.white : color,
+            borderRadius: BorderRadius.circular(24),
+            border: isOutlined ? Border.all(color: color, width: 3) : null,
+            boxShadow: [
+              BoxShadow(
+                color: color.withValues(alpha: 0.2),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isOutlined ? color.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  size: 40,
+                  color: isOutlined ? color : Colors.white,
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: isOutlined ? color : Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isOutlined ? color.withValues(alpha: 0.7) : Colors.white.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: isOutlined ? color : Colors.white.withValues(alpha: 0.5),
+                size: 20,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildProgressSection() {
     if (_isStatsLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
     final double progress = _totalCount > 0 ? _masteredCount / _totalCount : 0;
-    final String fileName = _selectedDatasetPath!.split('/').last;
+    final String displayName = _selectedDatasetName ?? '알 수 없는 빵';
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -242,7 +328,7 @@ class _HomeScreenState extends State<HomeScreen> {
         border: Border.all(color: const Color(0xFFFFE0B2)),
         boxShadow: [
           BoxShadow(
-            color: Colors.brown.withOpacity(0.05),
+            color: Colors.brown.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -256,7 +342,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Expanded(
                 child: Text(
-                  '🍞 $fileName',
+                  '🍞 $displayName',
                   style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF5D4037)),
                   overflow: TextOverflow.ellipsis,
                 ),

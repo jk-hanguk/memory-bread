@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../models/card_item.dart';
 import '../services/storage_service.dart';
+import '../services/bakery_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   final String assetPath;
@@ -13,7 +14,9 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final StorageService _storageService = StorageService();
+  final BakeryService _bakeryService = BakeryService();
   List<CardItem> _cards = [];
+  String _displayName = '';
   bool _isLoading = true;
 
   @override
@@ -24,8 +27,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _loadData() async {
     final cards = await _storageService.loadCards(widget.assetPath);
+    
+    String name;
+    if (widget.assetPath.startsWith('bakery://')) {
+      final id = widget.assetPath.replaceFirst('bakery://', '');
+      name = await _bakeryService.getBreadName(id);
+    } else {
+      name = widget.assetPath.split('/').last;
+    }
+
     setState(() {
       _cards = cards;
+      _displayName = name;
       _isLoading = false;
     });
   }
@@ -45,7 +58,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('데이터셋: ${widget.assetPath.split('/').last}'),
+            Text('데이터셋: $_displayName'),
             const SizedBox(height: 10),
             const SelectableText('아래 내용을 복사하여 보관하세요:'),
             const SizedBox(height: 10),
@@ -116,7 +129,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              '분석 중인 빵: ${widget.assetPath.split('/').last}',
+              '분석 중인 빵: $_displayName',
               style: Theme.of(context).textTheme.bodySmall,
               textAlign: TextAlign.center,
             ),
