@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/card_item.dart';
 import '../services/storage_service.dart';
 import '../widgets/latex_text.dart';
@@ -26,11 +27,22 @@ class _TestScreenState extends State<TestScreen> {
 
   List<CardItem> _allCards = [];
   List<CardItem> _testCards = [];
-  final List<CardItem> _wrongCards = []; // 오답 리스트 추가
+  final List<CardItem> _wrongCards = [];
   int _currentIndex = 0;
   int _score = 0;
   bool _isLoading = true;
   bool _isFinished = false;
+
+  String? _selectedOption;
+  bool _isShowingFeedback = false;
+  bool _isCorrectAnswer = false;
+  String _feedbackEmoji = '';
+
+  static const List<String> _correctEmojis = ['🍞', '🥖', '🥐', '🥯', '🥪'];
+  static const List<String> _incorrectEmojis = ['⬛', '🐀', '🐦', '💥', '💦'];
+  
+  static const Duration _feedbackDuration = Duration(milliseconds: 800);
+  static const Duration _shakeDuration = Duration(milliseconds: 400);
 
   late List<String> _currentOptions;
   late String _correctAnswer;
@@ -102,18 +114,37 @@ class _TestScreenState extends State<TestScreen> {
     _currentOptions.shuffle(_random);
   }
 
-  void _handleAnswer(String selectedOption) {
+  Future<void> _handleAnswer(String selectedOption) async {
+    if (_isShowingFeedback) return;
+
     bool isCorrect = selectedOption == _correctAnswer;
+    
+    setState(() {
+      _selectedOption = selectedOption;
+      _isCorrectAnswer = isCorrect;
+      _isShowingFeedback = true;
+      _feedbackEmoji = isCorrect 
+          ? _correctEmojis[_random.nextInt(_correctEmojis.length)]
+          : _incorrectEmojis[_random.nextInt(_incorrectEmojis.length)];
+    });
+
     if (isCorrect) {
+      HapticFeedback.lightImpact();
       _score++;
     } else {
-      // 오답 시 리스트에 추가
+      HapticFeedback.heavyImpact();
       _wrongCards.add(_testCards[_currentIndex]);
     }
 
     _testCards[_currentIndex].stats.updateResult(isCorrect);
 
+    await Future.delayed(_feedbackDuration);
+
+    if (!mounted) return;
+
     setState(() {
+      _isShowingFeedback = false;
+      _selectedOption = null;
       _currentIndex++;
     });
     _generateNextQuestion();
@@ -125,7 +156,6 @@ class _TestScreenState extends State<TestScreen> {
     await _storageService.saveProgress(widget.assetPath, updatedAllCards);
   }
 
-  // 점수대별 메시지 및 아이콘 가져오기
   Map<String, dynamic> _getResultInfo() {
     double ratio = _testCards.isEmpty ? 0 : _score / _testCards.length;
     if (ratio >= 1.0) {
@@ -260,91 +290,223 @@ class _TestScreenState extends State<TestScreen> {
         title: Text('소화 확인 (${_currentIndex + 1}/${_testCards.length})'),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            LinearProgressIndicator(
-              value: _currentIndex / _testCards.length,
-              minHeight: 12,
-              backgroundColor: Colors.white,
-              color: const Color(0xFFFFB74D),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            const SizedBox(height: 30),
-            Text(
-              questionText,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF5D4037)),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: Center(
-                child: SingleChildScrollView(
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFF3E0),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFFFCC80), width: 2),
-                    ),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: LatexText(
-                        text: displayValue,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF5D4037),
-                            ),
-                        mathFontSize: 24,
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                LinearProgressIndicator(
+                  value: _currentIndex / _testCards.length,
+                  minHeight: 12,
+                  backgroundColor: Colors.white,
+                  color: const Color(0xFFFFB74D),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                const SizedBox(height: 30),
+                Text(
+                  questionText,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF5D4037)),
+                ),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF3E0),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: const Color(0xFFFFCC80), width: 2),
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: LatexText(
+                            text: displayValue,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF5D4037),
+                                ),
+                            mathFontSize: 24,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 30),
-            ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.4,
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: _currentOptions.map((option) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                        backgroundColor: Colors.white,
-                        foregroundColor: const Color(0xFF5D4037),
-                        elevation: 1,
-                        side: const BorderSide(color: Color(0xFFFFE0B2)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      onPressed: () => _handleAnswer(option),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: LatexText(
-                          text: option,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 16),
-                          mathFontSize: 18,
-                        ),
-                      ),
+                const SizedBox(height: 30),
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.4,
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: _currentOptions.map((option) {
+                        bool isSelected = option == _selectedOption;
+                        bool shouldShake = _isShowingFeedback && isSelected && !_isCorrectAnswer;
+                        
+                        Color backgroundColor = Colors.white;
+                        Color borderColor = const Color(0xFFFFE0B2);
+                        Color textColor = const Color(0xFF5D4037);
+                        
+                        if (_isShowingFeedback) {
+                          if (isSelected) {
+                            backgroundColor = _isCorrectAnswer ? Colors.green.shade100 : Colors.red.shade100;
+                            borderColor = _isCorrectAnswer ? Colors.green : Colors.red;
+                            textColor = _isCorrectAnswer ? Colors.green.shade900 : Colors.red.shade900;
+                          } else if (option == _correctAnswer && !_isCorrectAnswer) {
+                            backgroundColor = Colors.green.shade50;
+                            borderColor = Colors.green.shade300;
+                            textColor = Colors.green.shade900;
+                          }
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: ShakeWidget(
+                            shouldShake: shouldShake,
+                            duration: _shakeDuration,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 18),
+                                backgroundColor: backgroundColor,
+                                foregroundColor: textColor,
+                                elevation: _isShowingFeedback && isSelected ? 4 : 1,
+                                side: BorderSide(color: borderColor, width: _isShowingFeedback && isSelected ? 2 : 1),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              onPressed: () => _handleAnswer(option),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: LatexText(
+                                  text: option,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontSize: 16),
+                                  mathFontSize: 18,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
                     ),
-                  )).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (_isShowingFeedback)
+            Positioned.fill(
+              child: Center(
+                child: IgnorePointer(
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0.0, end: 1.0),
+                    duration: _shakeDuration,
+                    curve: Curves.elasticOut,
+                    builder: (context, value, child) {
+                      return Transform.scale(
+                        scale: value,
+                        child: Opacity(
+                          opacity: value.clamp(0.0, 1.0),
+                          child: Container(
+                            padding: const EdgeInsets.all(32),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.85),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 20,
+                                  spreadRadius: 5,
+                                )
+                              ],
+                            ),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                _feedbackEmoji,
+                                style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.25),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
-          ],
-        ),
+        ],
       ),
+    );
+  }
+}
+
+class ShakeWidget extends StatefulWidget {
+  final Widget child;
+  final bool shouldShake;
+  final Duration duration;
+
+  const ShakeWidget({
+    super.key, 
+    required this.child, 
+    required this.shouldShake,
+    this.duration = const Duration(milliseconds: 400),
+  });
+
+  @override
+  State<ShakeWidget> createState() => _ShakeWidgetState();
+}
+
+class _ShakeWidgetState extends State<ShakeWidget> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: widget.duration);
+    _animation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0, end: 10), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 10, end: -10), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -10, end: 10), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 10, end: -10), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -10, end: 0), weight: 1),
+    ]).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void didUpdateWidget(ShakeWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.shouldShake && !oldWidget.shouldShake) {
+      _controller.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(_animation.value, 0),
+          child: child,
+        );
+      },
+      child: widget.child,
     );
   }
 }

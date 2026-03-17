@@ -2,17 +2,27 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'latex_text.dart';
 
+class FlashCardController {
+  void Function()? toggle;
+}
+
 class FlashCard extends StatefulWidget {
   final String frontText;
   final String backText;
+  final FlashCardController? controller;
 
-  const FlashCard({super.key, required this.frontText, required this.backText});
+  const FlashCard({
+    super.key,
+    required this.frontText,
+    required this.backText,
+    this.controller,
+  });
 
   @override
-  State<FlashCard> createState() => _FlashCardState();
+  State<FlashCard> createState() => FlashCardState();
 }
 
-class _FlashCardState extends State<FlashCard>
+class FlashCardState extends State<FlashCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
@@ -26,15 +36,28 @@ class _FlashCardState extends State<FlashCard>
       vsync: this,
     );
     _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
+    widget.controller?.toggle = toggleCard;
+  }
+
+  @override
+  void didUpdateWidget(FlashCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller?.toggle = null;
+      widget.controller?.toggle = toggleCard;
+    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    if (widget.controller?.toggle == toggleCard) {
+      widget.controller?.toggle = null;
+    }
     super.dispose();
   }
 
-  void _toggleCard() {
+  void toggleCard() {
     if (_isFront) {
       _controller.forward();
     } else {
@@ -47,27 +70,24 @@ class _FlashCardState extends State<FlashCard>
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _toggleCard,
-      child: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, child) {
-          final double angle = _animation.value * pi;
-          return Transform(
-            transform: Matrix4.identity()
-              ..setEntry(3, 2, 0.001) // 원근감 효과
-              ..rotateY(angle),
-            alignment: Alignment.center,
-            child: angle < pi / 2
-                ? _buildCardSide(widget.frontText, isFront: true)
-                : Transform(
-                    transform: Matrix4.identity()..rotateY(pi),
-                    alignment: Alignment.center,
-                    child: _buildCardSide(widget.backText, isFront: false),
-                  ),
-          );
-        },
-      ),
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        final double angle = _animation.value * pi;
+        return Transform(
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.001) // 원근감 효과
+            ..rotateY(angle),
+          alignment: Alignment.center,
+          child: angle < pi / 2
+              ? _buildCardSide(widget.frontText, isFront: true)
+              : Transform(
+                  transform: Matrix4.identity()..rotateY(pi),
+                  alignment: Alignment.center,
+                  child: _buildCardSide(widget.backText, isFront: false),
+                ),
+        );
+      },
     );
   }
 
@@ -87,17 +107,17 @@ class _FlashCardState extends State<FlashCard>
           minHeight: 220,
           maxHeight: size.height * 0.45,
         ),
-        alignment: Alignment.center,
         padding: const EdgeInsets.all(24),
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: LatexText(
-            text: text,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF5D4037),
+        child: Center(
+          child: SingleChildScrollView(
+            child: LatexText(
+              text: text,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF5D4037),
+              ),
+              mathFontSize: 24,
             ),
-            mathFontSize: 24,
           ),
         ),
       ),
